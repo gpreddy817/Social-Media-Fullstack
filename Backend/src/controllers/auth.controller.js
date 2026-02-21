@@ -37,10 +37,14 @@ async function registerController(req, res){
       { expiresIn: "1d" }
     )
   
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,   // required for localhost (true only in HTTPS)
+      sameSite: "lax", // required for cross-origin frontend
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
   
     res.status(201).json({
-      message: "User registered successfully",
       user: {
         email: user.email,
         username: user.username,
@@ -87,7 +91,12 @@ async function loginController(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,   // required for localhost (true only in HTTPS)
+      sameSite: "lax", // required for cross-origin frontend
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
 
   res.status(200).json({
     message: "User logged in successfully",
@@ -101,7 +110,44 @@ async function loginController(req, res) {
 
 }
 
+async function getmeController(req, res) {
+  try {
+    // 1️⃣ Make sure middleware attached user
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        message: "Unauthorized access"
+      })
+    }
+
+    const user = await userModel.findById(req.user.id)
+
+    // 2️⃣ Check if user exists in DB
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      })
+    }
+
+    // 3️⃣ Send response
+    res.status(200).json({
+      message: "User fetched successfully",
+      user: {
+        email: user.email,
+        username: user.username,
+        bio: user.bio,
+        profileImage: user.profileImage
+      }
+    })
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message
+    })
+  }
+}
 module.exports = {
     registerController,
-    loginController
+    loginController,
+    getmeController
 }
