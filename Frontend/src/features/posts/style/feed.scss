@@ -1,0 +1,90 @@
+
+.feed-page {
+
+  display: flex;
+  justify-content: center;  // horizontal center
+  align-items: center;   
+  flex-direction: column;   // 👈 vertical center
+
+  .feed {
+      max-width: 300px;
+      width: 100%;
+
+      .posts{
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;       // slightly increased gap (optional)
+      }
+
+      .post{
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          background-color: #312626;
+          padding: 0.5rem;
+          border-radius: 8px;  // optional nicer look
+
+          .user{
+              display: flex;
+              gap: 0.5rem;
+              align-items: center;
+              
+              .img-wrapper{
+                  border-radius: 50%;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  padding: 2px;   // 👈 important for gradient border
+                  background: conic-gradient(
+                    from 45deg,
+                    rgb(255, 102, 0),
+                    rgb(105, 0, 128),
+                    rgb(255, 102, 0)
+                  );
+              }
+
+              img{
+                  width: 2rem;
+                  aspect-ratio: 1/1;
+                  border-radius: 50%;
+                  display: block;
+              }
+          }
+
+          .icons{
+              display: flex;
+              justify-content: space-between;
+
+              .left{
+                  display: flex;
+                  gap: 0.75rem;
+              }
+
+              .like{
+                  color: red;
+              }
+              
+              svg{
+                  width: 1rem;
+                  aspect-ratio: 1/1;
+                  color: white;
+              }
+
+              button{
+                  background-color: transparent;
+                  border: none;
+                  outline: none;
+                  cursor: pointer;  // optional improvement
+              }
+          }
+
+          img{
+              width: 100%;
+              border-radius: 6px; 
+               // optional improvement
+          }
+      }
+  }
+}
