@@ -1,113 +1,161 @@
 const postModel = require("../models/post.model")
 const Imagekit = require("@imagekit/nodejs")
 const { toFile } = require("@imagekit/nodejs")
-const jwt = require("jsonwebtoken")
 const likeModel = require("../models/like.model")
 
-
 const imagekit = new Imagekit({
-    privateKey: process.env.IMAGEKIT_PRIVATE_KEY
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY
 })
 
 async function CreatePostController(req, res) {
-
+  try {
     const file = await imagekit.files.upload({
-        file: await toFile(Buffer.from(req.file.buffer), 'file'),
-        fileName: "test",
-        folder: "insta-clone"
+      file: await toFile(Buffer.from(req.file.buffer), "file"),
+      fileName: "post-image",
+      folder: "insta-clone"
     })
 
     const post = await postModel.create({
-        caption: req.body.caption,
-        imgUrl: file.url,
-        user: req.user.id
+      caption: req.body.caption,
+      imgUrl: file.url,
+      user: req.user.id
     })
 
-    res.status(201).json({
-        message: "post created successfully",
-        post
+    return res.status(201).json({
+      message: "Post created successfully",
+      post
     })
-    
+
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Internal server error" })
+  }
 }
 
 async function getPostController(req, res) {
-
-    
-
+  try {
     const userId = req.user.id
 
-    const posts = await postModel.find({
-        user: userId
+    const posts = await postModel.find({ user: userId })
+      .sort({ createdAt: -1 })
+
+    return res.status(200).json({
+      message: "Posts fetched successfully",
+      posts
     })
 
-    res.status(200).json({
-        message: "posts fetched successfully"
-    })
-
-
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Internal server error" })
+  }
 }
 
 async function getPostDetailsController(req, res) {
-    
+  try {
     const userId = req.user.id
-    const postid = req.params.postId
+    const postId = req.params.postId
 
-    const post = await postModel.findById(postid)
-    
-    if(!post){
-        return res.status(404).json({
-            message: "post not found"
-        })
+    const post = await postModel.findById(postId)
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found"
+      })
     }
 
-    const isValidUser = post.user.toString() == userId
-
-    if (!isValidUser) {
-        return res.status(403).json({
-            message: "forbidden content"
-        })
+    if (post.user.toString() !== userId) {
+      return res.status(403).json({
+        message: "Forbidden content"
+      })
     }
 
     return res.status(200).json({
-        message: "Post fetched successfully",
-        post
+      message: "Post fetched successfully",
+      post
     })
+
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Internal server error" })
+  }
 }
 
 async function likeUserController(req, res) {
-    try {
-        const userId = req.user.id
-        const postId = req.params.postId
+  try {
+    const userId = req.user.id
+    const postId = req.params.postId
 
-        // Check if the post exists
-        const post = await postModel.findById(postId)
-        if (!post) {
-            return res.status(404).json({ message: "Post not found" })
-        }
-
-        // Atomically create like if it doesn't exist
-        const like = await likeModel.findOneAndUpdate(
-            { post: postId, user: userId },       // filter
-            { post: postId, user: userId },       // update
-            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
-        )
-        
-
-        return res.status(200).json({
-            message: "Post liked successfully",
-            like
-        })
-
-    } catch (error) {
-        console.error(error)
-        return res.status(500).json({ message: "Internal server error" })
+    const post = await postModel.findById(postId)
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" })
     }
+
+    const like = await likeModel.findOneAndUpdate(
+      { post: postId, user: userId },
+      { post: postId, user: userId },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+
+    return res.status(200).json({
+      message: "Post liked successfully",
+      like
+    })
+
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Internal server error" })
+  }
 }
 
+async function unLikeUserController(req, res) {
+    try {
+      const userId = req.user.id
+      const postId = req.params.postId
+  
+      // Check if post exists
+      const post = await postModel.findById(postId)
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" })
+      }
+  
+      // Delete the like
+      const like = await likeModel.findOneAndDelete({ post: postId, user: userId })
+  
+      // Return clean response
+      return res.status(200).json({
+        message: like ? "Post unliked successfully" : "Like not found",
+        likeId: like?._id || null
+      })
+  
+    } catch (error) {
+      console.error(error)
+      return res.status(500).json({ message: "Internal server error" })
+    }
+  }
+async function getFeedController(req, res) {
+  try {
+    const posts = await postModel
+      .find()
+      .populate("user", "username bio profileImage")
+      .sort({ createdAt: -1 })
+      .lean()
+
+    return res.status(200).json({
+      message: "Feed fetched successfully",
+      posts
+    })
+
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: "Internal server error" })
+  }
+}
 
 module.exports = {
-    CreatePostController,
-    getPostController,
-    getPostDetailsController,
-    likeUserController
+  CreatePostController,
+  getPostController,
+  getPostDetailsController,
+  likeUserController,
+  getFeedController,
+  unLikeUserController
 }
