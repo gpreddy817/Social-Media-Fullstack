@@ -13,13 +13,13 @@ const postSchema = new mongoose.Schema({
 
     user:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "users",
+        ref: "user",
         required: [true, "userid is required to create a post"]
     },
 
     likes:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "users"
+        ref: "user"
     }
  
 })
