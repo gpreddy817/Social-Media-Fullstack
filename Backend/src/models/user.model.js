@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
     },
     password:{
         type: String,
-        required: [true, "password required"]
+        required: [true, "password required"],
+        select: false
     },
     bio: String,
     profileImage:{
@@ -22,14 +23,14 @@ const userSchema = new mongoose.Schema({
     },
     followers: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+        ref: "user"
     }],
     following: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+        ref: "user"
     }],
 })
 
-const userModel = mongoose.model("User", userSchema, "users") 
+const userModel = mongoose.model("user", userSchema, "users") 
 
 module.exports = userModel
