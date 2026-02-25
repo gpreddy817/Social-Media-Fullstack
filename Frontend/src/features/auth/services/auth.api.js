@@ -19,7 +19,7 @@ export async function register(username, email, password){
     return response.data
 }
 
-export async function getme(){
+export async function getMe(){
     const response = await api.get("./getme")
 
    return  response.data
