@@ -1,61 +1,58 @@
-import React, { use, useState } from 'react'
+import React, { useState } from 'react'
 import "../style/form.scss"
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/use.auth'
+import { Link } from 'react-router'
+import { useAuth } from '../hooks/useAuth'
+import { useNavigate } from 'react-router'
 
 const Login = () => {
 
-  const { user, loading, handleLogin } = useAuth()
+    const { user, loading, handleLogin } = useAuth()
 
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+    const [ username, setUsername ] = useState("")
+    const [ password, setPassword ] = useState("")
 
-  const navigate = useNavigate()
+    const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+    const handleSubmit = async (e) => {
+        e.preventDefault()
 
-    await handleLogin(username, password)
+        await handleLogin(username, password)
 
-    navigate("/")
-  }
-  if(loading){
-    return <main><h1>Loading...</h1></main>
-  }
+        navigate('/')
 
-  return (
-    <main>
-      <div className="form-container">
-        <h1>Login</h1>
+    }
 
-        <form onSubmit={handleSubmit}>
-          <input
-            onChange={(e) => setUsername(e.target.value)}
-            type="text"
-            name="username"
-            id="username"
-            placeholder="Enter username"
-          />
+    if (loading) {
+        return (<main>
+            <h1>Loading.....</h1>
+        </main>)
+    }
 
-          <input
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            name="password"
-            id="password"
-            placeholder="Enter password"
-          />
 
-          <button className="button primary-button" type="submit">
-            Login
-          </button>
-        </form>
+    return (
 
-        <p>
-          Don't have an account? <Link to="/register">Create one.</Link>
-        </p>
-      </div>
-    </main>
-  )
+        <main>
+            <div className="form-container">
+                <h1>Login</h1>
+                <form onSubmit={handleSubmit} >
+                    <input
+                        onInput={(e) => { setUsername(e.target.value) }}
+                        type="text"
+                        name='username'
+                        id='username'
+                        placeholder='Enter username' />
+                    <input
+                        onInput={(e) => { setPassword(e.target.value) }}
+                        type="password"
+                        name='password'
+                        id='password'
+                        placeholder='Enter password' />
+                    <button className='button primary-button' >Login</button>
+                </form>
+                <p>Don't have an account ? <Link to={"/register"} >Create One.</Link></p>
+            </div>
+        </main>
+    )
 }
 
 export default Login

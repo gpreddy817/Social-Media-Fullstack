@@ -1,25 +1,30 @@
-import React from 'react'
-import { Link } from 'react-router'
+import axios from "axios";
 
-const Register = () => {
-  const handlesubmit=(e)=>{
-    e.preventdefault()
-  } 
 
-  return (
-    <main>
-      <div className="form-container">
-        <h1>Register</h1>
-        <form onsubmit={handlesubmit}>
-          <input type="text" name='username' id='username' placeholder='Enter username'/>
-          <input type="email" name='email' id='email' placeholder='Enter email'/>
-          <input type="password" name='password' id='password' placeholder='Enter password'/>
-          <button className='button primary-button' type="submit">Login</button>
-        </form>
-        <p>Already have an account? <Link to="/login">Login.</Link></p>
-      </div>
-    </main>
-  )
+const api = axios.create({
+    baseURL: "http://localhost:3000/api/auth",
+    withCredentials: true,
+})
+
+
+export async function Login(username, password) {
+    const response = await api.post('/login', {
+        username, password
+    })
+
+    return response.data
 }
 
-export default Register
+export default async function Register(username, email, password) {
+    const response = await api.post('/register', {
+        username, email, password
+    })
+
+    return response.data
+}
+
+export async function getMe() {
+    const response = await api.get('/getme')
+
+    return response.data
+}
